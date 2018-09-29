@@ -51,7 +51,7 @@ void* operator new(std::size_t size, const char* file, int line)
     return memory;
 }
 
-void operator delete(void* ptr)
+void operator delete(void* ptr) noexcept(false)
 {
     bool found = false;
 
@@ -74,12 +74,14 @@ void operator delete(void* ptr)
     if (!found)
     {
         int* i_ptr = reinterpret_cast<int*>(ptr);
-        *i_ptr = 00000000;
 
-        std::stringstream ss("");
-        ss << "FREEING MEMORY ALREADY FREED (OR NOT ALLOCATED) AT " 
-            << delete_file << ": " << delete_line << "!\n";
-        throw ss.str();
+        if (*i_ptr == 00000000)
+        {
+            std::stringstream ss("");
+            ss << "LIKELY DOUBLE FREE AT "
+                << delete_file << ": " << delete_line << "!\n";
+            throw ss.str();
+        }
     }
 }
 
