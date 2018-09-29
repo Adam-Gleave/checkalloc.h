@@ -93,9 +93,10 @@ void delete_loc(const char* file, int line)
 }
 
 typedef std::pair<std::string, int> alloc_info;
+typedef std::vector<alloc_info> alloced;
 
 // Get file and line where memory was allocated
-alloc_info getinfo(void* ptr)
+alloc_info get_info(void* ptr)
 {
     for (auto iter = allocator.begin(); iter < allocator.end(); ++iter)
     {
@@ -108,6 +109,19 @@ alloc_info getinfo(void* ptr)
     std::stringstream ss("");
     ss << "CANNOT GET ALLOC INFO, POINTER TO FREED (OR NEVER ALLOCATED) MEMORY\n";
     throw ss.str();
+}
+
+// Get file and line of every item of allocated memory
+alloced get_alloced()
+{
+    alloced all_alloced = alloced();
+
+    for (auto iter = allocator.begin(); iter < allocator.end(); ++iter)
+    {
+        all_alloced.push_back(alloc_info((*iter).file, (*iter).line));
+    }
+
+    return all_alloced;
 }
 
 #endif
